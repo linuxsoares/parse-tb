@@ -1,15 +1,13 @@
 (ns parse-tb.core
-  (:require [parse-tb.parser :as parser]
+  (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clojure.pprint :as pp]
-            [instaparse.core :as insta]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [instaparse.core :as insta])
   (:gen-class))
 
-(defn- ->intermediate-format [text]
-  (parser/parse text))
-
 (defn -main [& args]
-  (let [file (first args)
+  (let [filename (first args)
         parse  (insta/parser
                     "document = chapter (box | <br> | empty-line+ | paragraph | quote | img | index | label | section | code | title | todo | list)+
                      box = <'[box '> (text | italic | monospaced)+ <']'> (<br> | empty-line+ | paragraph | index | code)+ <'[/box]'>
@@ -35,6 +33,8 @@
                      text = #'[A-ZÁÉÍÓÚÇÃÂÊÎÔÛÀa-z0-9áéíóúçãõâêîôûà.,;:!?&\\-_/\"\\'`’\\(\\)%=#\\*\\+\\<>{}$²^\\\\~@▷◁ ]+'
                      code-text = (!'[/code]' !'::' #'[A-ZÁÉÍÓÚÇÃÂÊÎÔÛÀa-z0-9áéíóúçãõâêîôûà.,;:!?&$\\-_/\"\\'\\(\\)%=#\\*\\+\\[\\]<>{}²^\\\\`|~@ ]{0,200}')+
                      ")
+        file   (java.io.File. filename)
+        out    (str/replace (.getName file) #"afc" "json")
         result (-> file
                 slurp
                 (str/replace #"::" "℔")
@@ -44,11 +44,11 @@
                 (str/replace #"℥\[\[", "℥▷▷")
                 (str/replace #"℥\[", "℥▷")
                 (str/replace #"]℥", "◁℥")
-                (parse) ; :trace true)
-                #_pp/pprint)]
-    (println "Parsing" file)
-    (when (insta/failure? result)
-      (pp/pprint result))))
+                parse)]
+    (println "Parsing" (.getAbsolutePath file))
+    (if (insta/failure? result)
+      (pp/pprint result)
+      (json/generate-stream result (io/writer (str "json/" out))))))
 
   ; (let [file (first args)]
   ;   (-> file
