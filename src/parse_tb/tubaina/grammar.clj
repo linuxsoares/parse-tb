@@ -2,7 +2,7 @@
 
 (def tubaina "document = chapter (box | <br> | empty-line+ | paragraph | quote | img | index | label | section | code | title | todo | list)+
               box = <'[box '> (text | italic | monospaced)+ <']'> (<br> | empty-line+ | paragraph | index | code)+ <'[/box]'>
-              code = <'[code' ' '?> ('javascript' | 'ruby' | 'clojure' | 'java')? text? (<' label='> text)? <']'> (ns-sym | code-text | br)* <'[/code]'>
+              code = <'[code' ' '?> ('javascript' | 'ruby' | 'clojure' | 'java' | 'html')? text? (<' label='> text)? <']'> (ns-sym | code-text | br)* <'[/code]'>
               br = <#'([\r]?[\n])+'>
               paragraph = <#'^'> (italic | bold | monospaced | text | ref | ref-label)* (br | <#'$'>)
               quote = <'[quote '> (text | ref | italic | <br>)+ <']'>
